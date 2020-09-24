@@ -1,0 +1,14 @@
+name = "CellLists"
+uuid = "b6871879-622e-446c-84f2-629b119ba541"
+authors = ["Jaan Tollander de Balsch <dev@jaantollander.com>"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Logging", "Test"]
