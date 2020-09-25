@@ -18,8 +18,15 @@ struct CellList{N}
     neighbors::Vector{CartesianIndex{N}}
 end
 
-"""Construct CellList for `d`-dimensional points `p` and radius `r>0`."""
-function CellList(p::Array{Float64, 2}, r::Float64)
+"""Construct CellList for `d`-dimensional points `p` and radius `r>0`.
+
+## Examples
+```julia
+p = rand(10, 2)
+c = CellList(p, 0.1)
+```
+"""
+function CellList(p::Array{T, 2}, r::T) where T <: AbstractFloat
     @assert r > 0
     n, d = size(p)
 
@@ -50,22 +57,25 @@ function CellList(p::Array{Float64, 2}, r::Float64)
 end
 
 """Query indices of points in cell `i`."""
-function query(c::CellList, i::CartesianIndex)
+function cell_indices(c::CellList, i::CartesianIndex)
     a = c.offset[i]
     b = a + c.count[i]
     return c.indices[(a+1):b]
 end
 
 """Return elements `j` and `j′` as sorted pair."""
-function sorted_pair(j::Int, j′::Int)::Tuple{Int, Int}
-    if j < j′
-        return (j, j′)
-    else
-        return (j′, j)
-    end
+function sorted_pair(j::Int, j′::Int)
+    if j < j′; (j, j′) else (j′, j) end
 end
 
-"""Returns vector of index pairs of points that are possible near neighbors."""
+"""Returns vector of index pairs of points that are possible near neighbors.
+
+## Examples
+```julia-repl
+julia> near_neighbors(c)
+[(3, 6), (4, 5)]
+```
+"""
 function near_neighbors(c::CellList)
     ps = Vector{Tuple{Int, Int}}()
 
@@ -75,7 +85,7 @@ function near_neighbors(c::CellList)
         end
 
         # Points in the current cell
-        js = query(c, i)
+        js = cell_indices(c, i)
 
         # Pairs of points within the cell
         for (k, j) in enumerate(js[1:(end-1)])
@@ -86,7 +96,7 @@ function near_neighbors(c::CellList)
 
         # Pairs of points with neighboring cells
         for i′ in c.neighbors
-            js′ = query(c, i+i′)
+            js′ = cell_indices(c, i+i′)
             for j in js, j′ in js′
                 push!(ps, sorted_pair(j, j′))
             end
