@@ -2,13 +2,23 @@ module CellLists
 
 export CellList, near_neighbors
 
-struct CellList
-    indices::Vector{Int}
-    shape::Vector{Int}
-    count::Array{Int}
-    offset::Array{Int}
+"""Compute differences to neighboring cell in CartesianIndices."""
+function neighbors(d::Int)
+    r = [UnitRange(-1, 1) for _ in 1:d]
+    p = vec(collect(Iterators.product(r...)))
+    is = p[1:div(length(p), 2)]
+    return [CartesianIndex(i...) for i in is]
 end
 
+"""CellList type."""
+struct CellList{N}
+    indices::Vector{Int}
+    count::Array{Int, N}
+    offset::Array{Int, N}
+    neighbors::Vector{CartesianIndex{N}}
+end
+
+"""Construct CellList for `d`-dimensional points `p` and radius `r>0`."""
 function CellList(p::Array{Float64, 2}, r::Float64)
     @assert r > 0
     n, d = size(p)
@@ -17,7 +27,7 @@ function CellList(p::Array{Float64, 2}, r::Float64)
     x_min = minimum(x, dims=1)
     x_max = maximum(x, dims=1)
     x_ind = @. (x - x_min + 1 + 1)
-    shape = vec(@. (x_max - x_min + 2 + 1)) # TODO: remove + 1?
+    shape = vec(@. (x_max - x_min + 2 + 1))
 
     # Number of points per cell
     count = zeros(Int, shape...)
@@ -29,7 +39,6 @@ function CellList(p::Array{Float64, 2}, r::Float64)
     # Sort the points by the order in cells
     offset = reshape(cumsum(vec(count)), size(count))
     indices = zeros(Int, n)
-
     for j in 1:n
         i = x_ind[j, :]
         k = offset[i...]
@@ -37,26 +46,28 @@ function CellList(p::Array{Float64, 2}, r::Float64)
         offset[i...] -= 1
     end
 
-    return CellList(indices, shape, count, offset)
+    CellList(indices, count, offset, neighbors(d))
 end
 
+"""Query indices of points in cell `i`."""
 function query(c::CellList, i::CartesianIndex)
     a = c.offset[i]
     b = a + c.count[i]
     return c.indices[(a+1):b]
 end
 
-function neighbors(dist::Int, d::Int)
-    @assert dist>=1
-    r = [UnitRange(-dist, dist) for _ in 1:d]
-    p = vec(collect(Iterators.product(r...)))
-    return [CartesianIndex(i...) for i in p[1:div(length(p), 2)]]
+"""Return elements `j` and `j′` as sorted pair."""
+function sorted_pair(j::Int, j′::Int)::Tuple{Int, Int}
+    if j < j′
+        return (j, j′)
+    else
+        return (j′, j)
+    end
 end
 
+"""Returns vector of index pairs of points that are possible near neighbors."""
 function near_neighbors(c::CellList)
     ps = Vector{Tuple{Int, Int}}()
-    d = length(c.shape)
-    neigh = neighbors(1, d)
 
     for i in CartesianIndices(c.count)
         if c.count[i] == 0
@@ -69,22 +80,20 @@ function near_neighbors(c::CellList)
         # Pairs of points within the cell
         for (k, j) in enumerate(js[1:(end-1)])
             for j′ in js[(k+1):end]
-                push!(ps, (j, j′))
+                push!(ps, sorted_pair(j, j′))
             end
         end
 
         # Pairs of points with neighboring cells
-        for i′ in neigh
+        for i′ in c.neighbors
             js′ = query(c, i+i′)
             for j in js, j′ in js′
-                push!(ps, (j, j′))
+                push!(ps, sorted_pair(j, j′))
             end
         end
     end
 
     return ps
 end
-
-# TODO: interface, iterate
 
 end # module
