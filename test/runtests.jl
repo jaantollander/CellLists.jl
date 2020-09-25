@@ -37,7 +37,7 @@ function test_correctness(rng::AbstractRNG, iterations::Int)
     for (n, d, r) in Iterators.product(ns, ds, rs)
         @info "Testing: n: $n | d: $d | r: $r"
         for i in 1:iterations
-            p = rand(rng, n, d)
+            p = 2 .* rand(rng, n, d) .- 1.0
             @test Set(brute(p, r)) == Set(cell_list(p, r))
         end
     end

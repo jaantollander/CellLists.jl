@@ -23,7 +23,7 @@ function CellList(p::Array{Float64, 2}, r::Float64)
     @assert r > 0
     n, d = size(p)
 
-    x = Int.(div.(p, r, RoundDown))
+    x = @. Int(fld(p, r))
     x_min = minimum(x, dims=1)
     x_max = maximum(x, dims=1)
     x_ind = @. (x - x_min + 1 + 1)
