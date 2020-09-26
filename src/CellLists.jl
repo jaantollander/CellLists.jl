@@ -1,6 +1,6 @@
 module CellLists
 
-export CellList, near_neighbors
+export CellList, cell_indices, near_neighbors
 
 """Compute differences to neighboring cell in CartesianIndices."""
 function neighbors(d::Int)
@@ -44,7 +44,9 @@ function CellList(p::Array{T, 2}, r::T) where T <: AbstractFloat
     # Sort the points by the order in cells
     offset = reshape(cumsum(vec(count)), size(count))
     indices = zeros(Int, n)
-    for j in 1:n
+    # Iterate points in reversed order j in n:-1:1,
+    # then output of cell_indices(c, i) is sorted.
+    for j in n:-1:1
         i = x_ind[j, :]
         k = offset[i...]
         indices[k] = j
@@ -54,19 +56,14 @@ function CellList(p::Array{T, 2}, r::T) where T <: AbstractFloat
     CellList(indices, count, offset, neighbors(d))
 end
 
-"""Query indices of points in cell `i`."""
+"""Return indices of points in cell `i`. Guaranteed to be in sorted order."""
 function cell_indices(c::CellList, i::CartesianIndex)
     a = c.offset[i]
     b = a + c.count[i]
     return c.indices[(a+1):b]
 end
 
-"""Return elements `j` and `j′` as sorted pair."""
-function sorted_pair(j::Int, j′::Int)
-    if j < j′; (j, j′) else (j′, j) end
-end
-
-"""Returns vector of index pairs of points that are possible near neighbors.
+"""Returns vector of index pairs of points that are near neighbors.
 
 ## Examples
 ```julia-repl
@@ -88,7 +85,7 @@ function near_neighbors(c::CellList)
         # Pairs of points within the cell
         for (k, j) in enumerate(js[1:(end-1)])
             for j′ in js[(k+1):end]
-                push!(ps, sorted_pair(j, j′))
+                push!(ps, (j, j′))
             end
         end
 
@@ -96,7 +93,11 @@ function near_neighbors(c::CellList)
         for i′ in c.neighbors
             js′ = cell_indices(c, i+i′)
             for j in js, j′ in js′
-                push!(ps, sorted_pair(j, j′))
+                if j < j′
+                    push!(ps, (j, j′))
+                else
+                    push!(ps, (j′, j))
+                end
             end
         end
     end
