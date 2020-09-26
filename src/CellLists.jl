@@ -4,10 +4,8 @@ export CellList, near_neighbors
 
 """Compute differences to neighboring cell in CartesianIndices."""
 function neighbors(d::Int)
-    r = [UnitRange(-1, 1) for _ in 1:d]
-    p = vec(collect(Iterators.product(r...)))
-    is = p[1:div(length(p), 2)]
-    return [CartesianIndex(i...) for i in is]
+    n = CartesianIndices(((-1:1 for _ in 1:d)...,))
+    return n[1:fld(length(n), 2)]
 end
 
 """CellList type."""
