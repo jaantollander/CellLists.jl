@@ -35,12 +35,32 @@ indices = near_neighbors(c)
 [(3, 6), (4, 5)]  # indices
 ```
 
+We can check if two points are within distance `r` as follows.
+
 ```julia
-for (i, j) in indices
-    if (p[i, :] .- p[j, :]).^2 ≤ r^2
-        # ...
+distance_condition(p1, p2, r) = (p1 .- p2).^2 ≤ r^2
+```
+
+We can iterate over neighboring points as follows.
+
+```julia
+for (i, j) in near_neighbors(c)
+    if distance_condition(p[i, :], p[j, :], r)
+        # (i, j) is a near neighbor
     end
 end
 ```
 
-On average, the Cell List algorithm is faster than brute force.
+We can compare Cell Lists to the brute force method.
+
+```julia
+for i in 1:(n-1)
+    for j in (i+1):n
+        if distance_condition(p[i, :], p[j, :], r)
+            # (i, j) is a near neighbor
+        end
+    end
+end
+```
+
+On average, the Cell List algorithm is more efficient than brute force when dimensions `d` is small, the number of points `n` is sufficiently large, and radius `r` is small compared to the bounding box of the points.

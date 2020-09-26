@@ -5,14 +5,13 @@ using CellLists
     sum((p1 .- p2).^2) ≤ r^2
 end
 
-function brute(p::Array{Float64, 2}, r::Float64)
+function brute_force(p::Array{Float64, 2}, r::Float64)
     ps = Vector{Tuple{Int, Int}}()
     n, d = size(p)
-    js = 1:n
-    for (k, j) in enumerate(js[1:(end-1)])
-        for j′ in js[(k+1):end]
-            if distance_condition(p[j, :], p[j′, :], r)
-                push!(ps, (j, j′))
+    for i in 1:(n-1)
+        for j in (i+1):n
+            if distance_condition(p[i, :], p[j, :], r)
+                push!(ps, (i, j))
             end
         end
     end
@@ -22,9 +21,9 @@ end
 function cell_list(p::Array{Float64, 2}, r::Float64)
     ps = Vector{Tuple{Int, Int}}()
     c = CellList(p, r)
-    for (j, j′) in near_neighbors(c)
-        if distance_condition(p[j, :], p[j′, :], r)
-            push!(ps, (j, j′))
+    for (i, j) in near_neighbors(c)
+        if distance_condition(p[i, :], p[j, :], r)
+            push!(ps, (i, j))
         end
     end
     return ps
@@ -38,7 +37,7 @@ function test_correctness(rng::AbstractRNG, iterations::Int)
         @info "Testing: n: $n | d: $d | r: $r"
         for i in 1:iterations
             p = 2 .* rand(rng, n, d) .- 1.0
-            @test Set(brute(p, r)) == Set(cell_list(p, r))
+            @test Set(brute_force(p, r)) == Set(cell_list(p, r))
         end
     end
 end
