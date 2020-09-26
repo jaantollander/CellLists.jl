@@ -11,8 +11,8 @@ end
 """CellList type."""
 struct CellList{N}
     indices::Vector{Int}
-    count::Array{Int, N}
-    offset::Array{Int, N}
+    counts::Array{Int, N}
+    offsets::Array{Int, N}
     neighbors::Vector{CartesianIndex{N}}
 end
 
@@ -31,35 +31,35 @@ function CellList(p::Array{T, 2}, r::T) where T <: AbstractFloat
     x = @. Int(fld(p, r))
     x_min = minimum(x, dims=1)
     x_max = maximum(x, dims=1)
-    x_ind = @. (x - x_min + 1 + 1)
-    shape = vec(@. (x_max - x_min + 2 + 1))
+    cells = @. (x - x_min + 2)
+    shape = @. (x_max - x_min + 3)
 
     # Number of points per cell
-    count = zeros(Int, shape...)
+    counts = zeros(Int, shape...)
     for j in 1:n
-        i = x_ind[j, :]
-        count[i...] += 1
+        cell = cells[j, :]
+        counts[cell...] += 1
     end
 
     # Sort the points by the order in cells
-    offset = reshape(cumsum(vec(count)), size(count))
+    offsets = reshape(cumsum(vec(counts)), size(counts))
     indices = zeros(Int, n)
     # Iterate points in reversed order j in n:-1:1,
-    # then output of cell_indices(c, i) is sorted.
+    # then output of cell_indices(c, cell) is sorted.
     for j in n:-1:1
-        i = x_ind[j, :]
-        k = offset[i...]
+        cell = cells[j, :]
+        k = offsets[cell...]
         indices[k] = j
-        offset[i...] -= 1
+        offsets[cell...] -= 1
     end
 
-    CellList(indices, count, offset, neighbors(d))
+    CellList(indices, counts, offsets, neighbors(d))
 end
 
-"""Return indices of points in cell `i`. Guaranteed to be in sorted order."""
-function cell_indices(c::CellList, i::CartesianIndex)
-    a = c.offset[i]
-    b = a + c.count[i]
+"""Return indices of points in `cell`. Guaranteed to be in sorted order."""
+function cell_indices(c::CellList, cell::CartesianIndex)
+    a = c.offsets[cell]
+    b = a + c.counts[cell]
     return c.indices[(a+1):b]
 end
 
@@ -74,29 +74,29 @@ julia> near_neighbors(c)
 function near_neighbors(c::CellList)
     ps = Vector{Tuple{Int, Int}}()
 
-    for i in CartesianIndices(c.count)
-        if c.count[i] == 0
+    for cell in CartesianIndices(c.counts)
+        if iszero(c.counts[cell])
             continue
         end
 
         # Points in the current cell
-        js = cell_indices(c, i)
+        is = cell_indices(c, cell)
 
         # Pairs of points within the cell
-        for (k, j) in enumerate(js[1:(end-1)])
-            for j′ in js[(k+1):end]
-                push!(ps, (j, j′))
+        for (k, i) in enumerate(is[1:(end-1)])
+            for j in is[(k+1):end]
+                push!(ps, (i, j))
             end
         end
 
         # Pairs of points with neighboring cells
-        for i′ in c.neighbors
-            js′ = cell_indices(c, i+i′)
-            for j in js, j′ in js′
-                if j < j′
-                    push!(ps, (j, j′))
+        for neigh in c.neighbors
+            js = cell_indices(c, cell + neigh)
+            for i in is, j in js
+                if i < j
+                    push!(ps, (i, j))
                 else
-                    push!(ps, (j′, j))
+                    push!(ps, (j, i))
                 end
             end
         end
