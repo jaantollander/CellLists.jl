@@ -3,7 +3,7 @@ module CellLists
 export CellList, cell_indices, near_neighbors
 
 """Compute differences to neighboring cell in CartesianIndices."""
-function neighbors(d::Int)
+@inline function neighbors(d::Int)
     n = CartesianIndices(((-1:1 for _ in 1:d)...,))
     return n[1:fld(length(n), 2)]
 end
@@ -57,10 +57,20 @@ function CellList(p::Array{T, 2}, r::T) where T <: AbstractFloat
 end
 
 """Return indices of points in `cell`. Guaranteed to be in sorted order."""
-function cell_indices(c::CellList, cell::CartesianIndex)
+@inline function Base.getindex(c::CellList, cell::CartesianIndex)
     a = c.offsets[cell]
     b = a + c.counts[cell]
     return c.indices[(a+1):b]
+end
+
+"""Cartesian indices of cell list."""
+@inline function Base.CartesianIndices(c::CellList)
+    CartesianIndices(c.counts)
+end
+
+"""Check whether cell is empty."""
+@inline function isempty(c::CellList, cell::CartesianIndex)
+    iszero(c.counts[cell])
 end
 
 """Returns vector of index pairs of points that are near neighbors.
@@ -74,15 +84,13 @@ julia> near_neighbors(c)
 function near_neighbors(c::CellList)
     ps = Vector{Tuple{Int, Int}}()
 
-    for cell in CartesianIndices(c.counts)
-        if iszero(c.counts[cell])
+    for cell in CartesianIndices(c)
+        if isempty(c, cell)
             continue
         end
 
-        # Points in the current cell
-        is = cell_indices(c, cell)
-
         # Pairs of points within the cell
+        is = c[cell]
         for (k, i) in enumerate(is[1:(end-1)])
             for j in is[(k+1):end]
                 push!(ps, (i, j))
@@ -91,7 +99,7 @@ function near_neighbors(c::CellList)
 
         # Pairs of points with neighboring cells
         for neigh in c.neighbors
-            js = cell_indices(c, cell + neigh)
+            js = c[cell + neigh]
             for i in is, j in js
                 if i < j
                     push!(ps, (i, j))

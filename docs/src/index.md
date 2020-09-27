@@ -4,6 +4,8 @@ Documentation for CellLists.jl
 ```@docs
 CellList
 CellList(::Array{T, 2}, ::T) where T <: AbstractFloat
-cell_indices(::CellList, ::CartesianIndex)
+Base.getindex(::CellList, ::CartesianIndex)
+Base.CartesianIndices(::CellList)
+Base.isempty(::CellList)
 near_neighbors(::CellList)
 ```
