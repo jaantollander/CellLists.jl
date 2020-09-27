@@ -69,7 +69,7 @@ end
 end
 
 """Check whether cell is empty."""
-@inline function isempty(c::CellList, cell::CartesianIndex)
+@inline function Base.isempty(c::CellList, cell::CartesianIndex)
     iszero(c.counts[cell])
 end
 
