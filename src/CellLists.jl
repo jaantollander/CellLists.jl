@@ -56,13 +56,6 @@ function CellList(p::Array{T, 2}, r::T) where T <: AbstractFloat
     CellList(indices, counts, offsets, neighbors(d))
 end
 
-"""Return indices of points in `cell`. Guaranteed to be in sorted order."""
-@inline function Base.getindex(c::CellList, cell::CartesianIndex)
-    a = c.offsets[cell]
-    b = a + c.counts[cell]
-    return c.indices[(a+1):b]
-end
-
 """Cartesian indices of cell list."""
 @inline function Base.CartesianIndices(c::CellList)
     CartesianIndices(c.counts)
@@ -71,6 +64,13 @@ end
 """Check whether cell is empty."""
 @inline function Base.isempty(c::CellList, cell::CartesianIndex)
     iszero(c.counts[cell])
+end
+
+"""Return indices of points in `cell`. Guaranteed to be in sorted order."""
+@inline function Base.getindex(c::CellList, cell::CartesianIndex)
+    a = c.offsets[cell]
+    b = a + c.counts[cell]
+    return c.indices[(a+1):b]
 end
 
 """Returns vector of index pairs of points that are near neighbors.
@@ -84,6 +84,7 @@ julia> near_neighbors(c)
 function near_neighbors(c::CellList)
     ps = Vector{Tuple{Int, Int}}()
 
+    # Iterate over non-empty cells
     for cell in CartesianIndices(c)
         if isempty(c, cell)
             continue
@@ -101,11 +102,7 @@ function near_neighbors(c::CellList)
         for neigh in c.neighbors
             js = c[cell + neigh]
             for i in is, j in js
-                if i < j
-                    push!(ps, (i, j))
-                else
-                    push!(ps, (j, i))
-                end
+                push!(ps, i < j ? (i, j) : (j, i))
             end
         end
     end
