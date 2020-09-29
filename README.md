@@ -18,6 +18,7 @@ pkg> add https://github.com/jaantollander/CellLists.jl
 We can use `CellLists.jl` by supplying `n`, `d`-dimensional points, and fixed radius `r` to the `CellList` constructor.
 
 ```julia
+using CellLists
 n = 10
 d = 2
 r = 0.1
@@ -63,4 +64,92 @@ for i in 1:(n-1)
 end
 ```
 
-On average, the Cell List algorithm is more efficient than brute force when dimensions `d` is small, the number of points `n` is sufficiently large, and radius `r` is small compared to the bounding box of the points.
+On average, the Cell List algorithm is more efficient than brute force when dimensions `d` is small, the number of points `n` is sufficiently large, and radius `r` is small compared to the bounding box of the points. Benchmarking section discusses how to benchmark instances to compare performances.
+
+
+## Benchmarking
+We can benchmark instances of Cell List agains brute force. First, we define the benchmarking functions.
+
+```julia
+using CellLists
+
+@inline function distance_condition(p1::Vector{T}, p2::Vector{T}, r::T) where T <: AbstractFloat
+    sum(@. (p1 - p2)^2) ≤ r^2
+end
+
+@noinline function brute_force(p::Array{T, 2}, r::T) where T <: AbstractFloat
+    n, d = size(p)
+    for i in 1:(n-1)
+        for j in (i+1):n
+            distance_condition(p[i, :], p[j, :], r)
+        end
+    end
+end
+
+@noinline function cell_list(p::Array{T, 2}, r::T) where T <: AbstractFloat
+    c = CellList(p, r)
+    for (i, j) in near_neighbors(c)
+        distance_condition(p[i, :], p[j, :], r)
+    end
+end
+```
+
+We will use [BenchmarkTools.jl](https://github.com/JuliaCI/BenchmarkTools.jl) for benchmarking.
+
+```julia
+using Random, BenchmarkTools
+n, d, r = 100, 2, 0.01
+p = rand(MersenneTwister(123), n, d)
+```
+
+Next, we run the benchmarks for `cell_list` and `brute_force` functions.
+
+```julia
+julia> t1 = @benchmark cell_list($p, $r)
+BenchmarkTools.Trial:
+  memory estimate:  247.72 KiB
+  allocs estimate:  1342
+  --------------
+  minimum time:     139.887 μs (0.00% GC)
+  median time:      142.244 μs (0.00% GC)
+  mean time:        151.768 μs (5.67% GC)
+  maximum time:     2.036 ms (91.81% GC)
+  --------------
+  samples:          10000
+  evals/sample:     1
+```
+
+```julia
+julia> t2 = @benchmark brute_force($p, $r)
+BenchmarkTools.Trial:
+  memory estimate:  1.36 MiB
+  allocs estimate:  14850
+  --------------
+  minimum time:     364.960 μs (0.00% GC)
+  median time:      367.289 μs (0.00% GC)
+  mean time:        397.621 μs (7.15% GC)
+  maximum time:     1.579 ms (76.08% GC)
+  --------------
+  samples:          10000
+  evals/sample:     1
+```
+
+We can compare the median execution times times and memory usage.
+
+```julia
+julia> ratio(median(t1), median(t2))
+BenchmarkTools.TrialRatio:
+  time:             0.3872803333610136
+  gctime:           1.0
+  memory:           0.17793490460157127
+  allocs:           0.09037037037037036
+```
+
+```julia
+julia> judge(median(t1), median(t2))
+BenchmarkTools.TrialJudgement:
+  time:   -61.27% => improvement (5.00% tolerance)
+  memory: -82.21% => improvement (1.00% tolerance)
+```
+
+As we can see, Cell List performs much better on this instance than brute force.
