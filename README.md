@@ -19,9 +19,7 @@ We can use `CellLists.jl` by supplying `n`, `d`-dimensional points, and fixed ra
 
 ```julia
 using CellLists
-n = 10
-d = 2
-r = 0.1
+n, d, r = 10, 2, 0.1
 p = rand(n, d)
 c = CellList(p, r)
 ```
@@ -107,13 +105,13 @@ Next, we run the benchmarks for `cell_list` and `brute_force` functions.
 ```julia
 julia> t1 = @benchmark cell_list($p, $r)
 BenchmarkTools.Trial:
-  memory estimate:  247.72 KiB
-  allocs estimate:  1342
+  memory estimate:  47.11 KiB
+  allocs estimate:  635
   --------------
-  minimum time:     139.887 μs (0.00% GC)
-  median time:      142.244 μs (0.00% GC)
-  mean time:        151.768 μs (5.67% GC)
-  maximum time:     2.036 ms (91.81% GC)
+  minimum time:     78.103 μs (0.00% GC)
+  median time:      79.670 μs (0.00% GC)
+  mean time:        82.669 μs (2.86% GC)
+  maximum time:     2.702 ms (94.47% GC)
   --------------
   samples:          10000
   evals/sample:     1
@@ -139,17 +137,17 @@ We can compare the median execution times times and memory usage.
 ```julia
 julia> ratio(median(t1), median(t2))
 BenchmarkTools.TrialRatio:
-  time:             0.3872803333610136
+  time:             0.21648868237276161
   gctime:           1.0
-  memory:           0.17793490460157127
-  allocs:           0.09037037037037036
+  memory:           0.03383838383838384
+  allocs:           0.04276094276094276
 ```
 
 ```julia
 julia> judge(median(t1), median(t2))
 BenchmarkTools.TrialJudgement:
-  time:   -61.27% => improvement (5.00% tolerance)
-  memory: -82.21% => improvement (1.00% tolerance)
+  time:   -78.35% => improvement (5.00% tolerance)
+  memory: -96.62% => improvement (1.00% tolerance)
 ```
 
 As we can see, Cell List performs much better on this instance than brute force.

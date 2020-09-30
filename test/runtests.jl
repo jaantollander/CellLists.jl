@@ -34,7 +34,9 @@ function test_correctness(rng::AbstractRNG, ns::Vector{Int}, ds::Vector{Int}, rs
         @info "Testing: n: $n | d: $d | r: $r"
         for i in 1:iterations
             p = 2 .* rand(rng, n, d) .- 1.0
-            @test Set(brute_force(p, r)) == Set(cell_list(p, r))
+            a = Set(brute_force(p, r))
+            b = Set(cell_list(p, r))
+            @test b == a
         end
     end
 end
@@ -42,5 +44,5 @@ end
 const rng = MersenneTwister(894)
 const ns = [1, 2, 10, 100]
 const ds = [1, 2, 3]
-const rs = [0.01, 0.033, 0.05, 0.1, 0.2, 0.5, 1.0]
-test_correctness(rng, ns, ds, rs, 100)
+const rs = [0.1, 0.2, 0.5, 1.0]
+test_correctness(rng, ns, ds, rs, 20)
