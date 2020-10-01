@@ -19,7 +19,7 @@ function CellList(p::Array{T, 2}, r::T) where T <: AbstractFloat
     indices = Dict{CartesianIndex{d}, Vector{Int}}()
     for j in 1:n
         cell = CartesianIndex(cells[j, :]...)
-        if cell in keys(indices)
+        if haskey(indices, cell)
             push!(indices[cell], j)
         else
             indices[cell] = [j]
@@ -40,7 +40,7 @@ function near_neighbors(c::CellList)
         end
         # Pairs of points with (non-empty) neighboring cells
         for neigh in c.neighbors
-            if (cell + neigh) in keys(c.indices)
+            if haskey(c.indices, cell + neigh)
                 js = c.indices[cell + neigh]
                 for i in is, j in js
                     push!(ps, i < j ? (i, j) : (j, i))
