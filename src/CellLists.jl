@@ -1,17 +1,22 @@
 module CellLists
 
-"""Compute differences to neighboring cell in CartesianIndices."""
-@inline function neighbors(d::Int)
-    n = CartesianIndices(((-1:1 for _ in 1:d)...,))
-    return n[1:fld(length(n), 2)]
+export CellList, near_neighbors
+
+"""CellList type. The `indices` dictionary maps the `CartesianIndex` of each cell to the indices of points in that cell.
+"""
+struct CellList{d}
+    indices::Dict{CartesianIndex{d}, Vector{Int}}
 end
 
-"""CellList type."""
-struct CellList{N}
-    indices::Dict{CartesianIndex{N}, Vector{Int}}
-    neighbors::Vector{CartesianIndex{N}}
-end
+"""Construct CellList from points `p` and radius `r>0`.
 
+# Examples
+```julia
+n, d, r = 100, 2, 0.01
+p = rand(n, d)
+c = CellLists(p, r)
+```
+"""
 function CellList(p::Array{T, 2}, r::T) where T <: AbstractFloat
     @assert r > 0
     n, d = size(p)
@@ -25,11 +30,26 @@ function CellList(p::Array{T, 2}, r::T) where T <: AbstractFloat
             indices[cell] = [j]
         end
     end
-    CellList{d}(indices, neighbors(d))
+    CellList{d}(indices)
 end
 
-function near_neighbors(c::CellList)
+"""Compute offsets to neighboring cells in `d` dimensions."""
+@inline function neighbors(d::Int)
+    n = CartesianIndices(((-1:1 for _ in 1:d)...,))
+    return n[1:fld(length(n), 2)]
+end
+
+"""Return a vector of all pairs that are in neighboring cells in the cell list.
+
+# Examples
+```julia-repl
+julia> near_neighbors(c)
+[(1, 4), (3, 11), ...]
+```
+"""
+function near_neighbors(c::CellList{d}) where d
     ps = Vector{Tuple{Int, Int}}()
+    offsets = neighbors(d)
     # Iterate over non-empty cells
     for (cell, is) in c.indices
         # Pairs of points within the cell
@@ -39,9 +59,9 @@ function near_neighbors(c::CellList)
             end
         end
         # Pairs of points with (non-empty) neighboring cells
-        for neigh in c.neighbors
-            if haskey(c.indices, cell + neigh)
-                js = c.indices[cell + neigh]
+        for offset in offsets
+            if haskey(c.indices, cell + offset)
+                js = c.indices[cell + offset]
                 for i in is, j in js
                     push!(ps, i < j ? (i, j) : (j, i))
                 end
@@ -50,7 +70,5 @@ function near_neighbors(c::CellList)
     end
     return ps
 end
-
-export CellList, near_neighbors
 
 end # module
