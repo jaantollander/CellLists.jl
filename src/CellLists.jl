@@ -35,7 +35,7 @@ end
 
 """Compute offsets to neighboring cells in `d` dimensions."""
 @inline function neighbors(d::Int)
-    n = CartesianIndices(((-1:1 for _ in 1:d)...,))
+    n = CartesianIndices((fill(-1:1, d)...,))
     return n[1:fld(length(n), 2)]
 end
 
@@ -58,7 +58,7 @@ function near_neighbors(c::CellList{d}) where d
                 push!(ps, (i, j))
             end
         end
-        # Pairs of points with (non-empty) neighboring cells
+        # Pairs of points with non-empty neighboring cells
         for offset in offsets
             if haskey(c.indices, cell + offset)
                 js = c.indices[cell + offset]
