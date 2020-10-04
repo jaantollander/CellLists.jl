@@ -34,8 +34,8 @@ function test_correctness(rng::AbstractRNG, ns::Vector{Int}, ds::Vector{Int}, rs
         @info "Testing: n: $n | d: $d | r: $r"
         for i in 1:iterations
             p = 2 .* rand(rng, n, d) .- 1.0
-            a = Set(brute_force(p, r))
-            b = Set(cell_list(p, r))
+            a = Set(Set.(brute_force(p, r)))
+            b = Set(Set.(cell_list(p, r)))
             @test b == a
         end
     end
