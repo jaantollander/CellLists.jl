@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/jaantollander/CellLists.jl.svg?branch=master)](https://travis-ci.org/jaantollander/CellLists.jl)
 
 ## Description
-`CellLists.jl` is an algorithm that solves the fixed-radius near neighbors problem. That is, it finds all pairs of points that are within a fixed distance apart from each other.
+`CellLists.jl` is an algorithm that solves the fixed-radius near neighbors problem. That is, it finds all pairs of points that are within a fixed distance apart from each other. Additionally, I wrote an article [*Searching for Fixed-Radius Near Neighbors with Cell Lists*](https://jaantollander.com/post/searching-for-fixed-radius-near-neighbors-with-cell-lists/), which explores the Cell Lists algorithm and theory behind it more deeply.
 
 
 ## Installation
