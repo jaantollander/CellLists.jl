@@ -1,4 +1,6 @@
 # CellLists.jl
+![](docs/src/images/cell_list.svg)
+
 [![Docs Image](https://img.shields.io/badge/docs-latest-blue.svg)](https://jaantollander.github.io/CellLists.jl/dev/)
 [![Build Status](https://travis-ci.org/jaantollander/CellLists.jl.svg?branch=master)](https://travis-ci.org/jaantollander/CellLists.jl)
 
@@ -18,48 +20,39 @@ pkg> add https://github.com/jaantollander/CellLists.jl
 We can use `CellLists.jl` by supplying `n`, `d`-dimensional points, and fixed radius `r` to the `CellList` constructor.
 
 ```julia
-using CellLists
+using CellLists: CellList, near_neighbors, distance_condition
 n, d, r = 10, 2, 0.1
 p = rand(n, d)
 c = CellList(p, r)
 ```
 
-By calling the `near_neighbors` function, we obtain a list of index pairs. A subset of the list contains the points that are within the given radius.
+By calling the `near_neighbors` function, we obtain a list of index pairs of points that are within `r` distance.
 
 ```julia
 indices = near_neighbors(c)
 ```
 
 ```julia
-[(3, 6), (4, 5)]  # indices
-```
-
-We can check if two points are within distance `r` as follows.
-
-```julia
-distance_condition(p1, p2, r) = (p1 .- p2).^2 ≤ r^2
-```
-
-We can iterate over neighboring points as follows.
-
-```julia
-for (i, j) in near_neighbors(c)
-    if distance_condition(p[i, :], p[j, :], r)
-        # (i, j) is a near neighbor
-    end
-end
+[(3, 6), (4, 5), ...]  # indices
 ```
 
 We can compare Cell Lists to the brute force method.
 
 ```julia
+indices2 = Vector{Tuple{Int, Int}}()
 for i in 1:(n-1)
     for j in (i+1):n
         if distance_condition(p[i, :], p[j, :], r)
-            # (i, j) is a near neighbor
+            push!(indices2, (i, j))
         end
     end
 end
+```
+
+The outputs should be equal as follows:
+
+```julia
+@assert Set(Set.(indices)) == Set(Set.(indices2))
 ```
 
 On average, the Cell List algorithm is more efficient than brute force when dimensions `d` is small, the number of points `n` is sufficiently large, and radius `r` is small compared to the bounding box of the points. Benchmarking section discusses how to benchmark instances to compare performances.
@@ -69,26 +62,22 @@ On average, the Cell List algorithm is more efficient than brute force when dime
 We can benchmark instances of Cell List agains brute force. First, we define the benchmarking functions.
 
 ```julia
-using CellLists
-
-@inline function distance_condition(p1::Vector{T}, p2::Vector{T}, r::T) where T <: AbstractFloat
-    sum(@. (p1 - p2)^2) ≤ r^2
-end
-
-@noinline function brute_force(p::Array{T, 2}, r::T) where T <: AbstractFloat
+function brute_force(p::Array{T, 2}, r::T) where T <: AbstractFloat
+    ps = Vector{Tuple{Int, Int}}()
     n, d = size(p)
     for i in 1:(n-1)
         for j in (i+1):n
-            distance_condition(p[i, :], p[j, :], r)
+            if @inbounds distance_condition(p[i, :], p[j, :], r)
+                push!(ps, (i, j))
+            end
         end
     end
+    return ps
 end
 
-@noinline function cell_list(p::Array{T, 2}, r::T) where T <: AbstractFloat
+function cell_list(p::Array{T, 2}, r::T) where T <: AbstractFloat
     c = CellList(p, r)
-    for (i, j) in near_neighbors(c)
-        distance_condition(p[i, :], p[j, :], r)
-    end
+    return near_neighbors(c, p, r)
 end
 ```
 
