@@ -2,15 +2,7 @@ using Base.Threads
 
 """Merge two `CellList{d}`s with same dimension `d`."""
 function Base.merge(c1::CellList{d}, c2::CellList{d}) where d
-    data = copy(c1.data)
-    for (cell, is) in c2.data
-        if haskey(data, cell)
-            @inbounds append!(data[cell], is)
-        else
-            data[cell] = is
-        end
-    end
-    CellList{d}(data)
+    CellList{d}(merge(vcat, c1.data, c2.data))
 end
 
 """Multi-threaded constructor for CellList."""
