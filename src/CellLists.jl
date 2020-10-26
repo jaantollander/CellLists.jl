@@ -1,6 +1,6 @@
 module CellLists
 
-include("sequential.jl")
+include("serial.jl")
 include("parallel.jl")
 export CellList, near_neighbors, brute_force!, distance_condition, merge
 
