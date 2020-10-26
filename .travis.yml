@@ -8,6 +8,10 @@ julia:
 branches:
   only:
     - master
+env:
+  matrix:
+    - JULIA_NUM_THREADS=1
+    - JULIA_NUM_THREADS=2
 #coveralls: true
 jobs:
   include:
