@@ -1,6 +1,6 @@
 name = "CellLists"
 uuid = "b6871879-622e-446c-84f2-629b119ba541"
-authors = ["Jaan Tollander de Balsch <dev@jaantollander.com>"]
+authors = ["Jaan Tollander de Balsch <jaan@hey.com>"]
 version = "0.1.0"
 
 [compat]

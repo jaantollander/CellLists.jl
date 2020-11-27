@@ -2,7 +2,8 @@
 ![](docs/src/images/cell_list.svg)
 
 [![Docs Image](https://img.shields.io/badge/docs-latest-blue.svg)](https://jaantollander.github.io/CellLists.jl/dev/)
-[![Build Status](https://travis-ci.org/jaantollander/CellLists.jl.svg?branch=master)](https://travis-ci.org/jaantollander/CellLists.jl)
+![Runtests](https://github.com/jaantollander/CellLists.jl/workflows/Runtests/badge.svg)
+
 
 ## Description
 `CellLists.jl` is an algorithm that solves the fixed-radius near neighbors problem. That is, it finds all pairs of points that are within a fixed distance apart from each other. Additionally, I wrote an article [*Searching for Fixed-Radius Near Neighbors with Cell Lists*](https://jaantollander.com/post/searching-for-fixed-radius-near-neighbors-with-cell-lists/), which explores the Cell Lists algorithm and theory behind it more deeply.
@@ -140,3 +141,14 @@ BenchmarkTools.TrialJudgement:
 ```
 
 As we can see, Cell List performs much better on this instance than brute force.
+
+
+## Multi-Threading
+
+```bash
+export JULIA_NUM_THREADS=2 && julia
+```
+
+```julia
+CellList(p, r, Val{:parallel})
+```
