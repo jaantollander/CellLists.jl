@@ -71,14 +71,15 @@ end
 p_near_neighbors(c, p, r; t=3*nthreads())
 ```
 """
-function p_near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T; t::Int = nthreads()) where d where T <: AbstractFloat
+function p_near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T; t::Int=nthreads()) where d where T <: AbstractFloat
     @assert t ≥ 1
     offsets = neighbors(d)
-    pts = Vector{Vector{Tuple{Int, Int}}}(undef, t)
     data = collect(c.data)
     subsets = greedy_partition(@.(length(values(data))^2), t)
+    tasks = Array{Task}(undef, t)
     @sync for (i, subset) in collect(enumerate(subsets))
-        @spawn pts[i] = near_neighbors_part(c, data[subset], p, r, offsets)
+        @async tasks[i] = @spawn near_neighbors_part(c, data[subset], p, r, offsets)
     end
+    pts = fetch.(tasks)
     return reduce(vcat, pts)
 end
