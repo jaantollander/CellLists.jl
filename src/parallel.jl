@@ -35,7 +35,7 @@ function CellList(p::Array{T, 2}, r::T, ::Val{:parallel}) where T <: AbstractFlo
     return reduce(merge, res)
 end
 
-function brute_cell(cell, is, p, r, data, offsets)
+function brute_force_cell(cell, is, p, r, data, offsets)
     ps = Vector{Tuple{Int, Int}}()
     # Pairs of points within the cell
     brute_force!(ps, is, p, r)
@@ -56,7 +56,7 @@ function p_near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T) where d where T 
     tasks = Array{Task}(undef, length(c.data))
     # Iterate over non-empty cells
     @sync for (i, (cell, is)) in enumerate(c.data)
-        @async tasks[i] = @spawn brute_cell(cell, is, p, r, c.data, offsets)
+        @async tasks[i] = @spawn brute_force_cell(cell, is, p, r, c.data, offsets)
     end
     pts = fetch.(tasks)
     return isempty(pts) ? [] : reduce(vcat, pts)
