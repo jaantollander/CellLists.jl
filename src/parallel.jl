@@ -59,5 +59,5 @@ function p_near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T) where d where T 
         @async tasks[i] = @spawn brute_force_cell(cell, is, p, r, c.data, offsets)
     end
     pts = fetch.(tasks)
-    return isempty(pts) ? [] : reduce(vcat, pts)
+    return reduce(vcat, pts; init=Vector{Tuple{Int, Int}}())
 end
