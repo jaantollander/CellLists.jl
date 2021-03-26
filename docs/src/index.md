@@ -14,5 +14,5 @@ near_neighbors(::CellList, ::Array{T, 2}, ::T) where T <: AbstractFloat
 ```@docs
 merge(::CellList{d}, ::CellList{d}) where d
 CellList(::Array{T, 2}, ::T, ::Val{:parallel}) where T <: AbstractFloat
-p_near_neighbors(::CellList, ::Array{T, 2}, ::T) where T <: AbstractFloat
+p_near_neighbors(::CellList{d}, ::Array{T, 2}, ::T) where d where T <: AbstractFloat
 ```
