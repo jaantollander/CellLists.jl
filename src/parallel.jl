@@ -35,51 +35,29 @@ function CellList(p::Array{T, 2}, r::T, ::Val{:parallel}) where T <: AbstractFlo
     return reduce(merge, res)
 end
 
-function greedy_partition(m::Vector{Int}, n::Int)
-    # Put largest item to subset of the smallest size.
-    sizes = zeros(Int, n)
-    subsets = [Vector{Int}() for _ in 1:n]
-    for i in reverse(sortperm(m))
-        _, j = findmin(sizes)
-        sizes[j] += m[i]
-        push!(subsets[j], i)
-    end
-    return subsets
-end
-
-function near_neighbors_part(c::CellList{d}, data::Vector{Pair{CartesianIndex{d}, Vector{Int}}}, p::Array{T, 2}, r::T, offsets::Vector{CartesianIndex{d}}) where d where T <: AbstractFloat
+function brute_cell(cell, is, p, r, data, offsets)
     ps = Vector{Tuple{Int, Int}}()
-    for (cell, is) in data
-        # Pairs of points within the cell
-        brute_force!(ps, is, p, r)
-        # Pairs of points with non-empty neighboring cells
-        for offset in offsets
-            neigh_cell = cell + offset
-            if haskey(c.data, neigh_cell)
-                @inbounds js = c.data[neigh_cell]
-                brute_force!(ps, is, js, p, r)
-            end
+    # Pairs of points within the cell
+    brute_force!(ps, is, p, r)
+    # Pairs of points with non-empty neighboring cells
+    for offset in offsets
+        neigh_cell = cell + offset
+        if haskey(data, neigh_cell)
+            @inbounds js = data[neigh_cell]
+            brute_force!(ps, is, js, p, r)
         end
     end
     return ps
 end
 
-"""Parallel near neighbors
-
-# Examples
-```julia
-p_near_neighbors(c, p, r; t=3*nthreads())
-```
-"""
-function p_near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T; t::Int=nthreads()) where d where T <: AbstractFloat
-    @assert t ≥ 1
+"""Parallel near neighbors"""
+function p_near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T) where d where T <: AbstractFloat
     offsets = neighbors(d)
-    data = collect(c.data)
-    subsets = greedy_partition(@.(length(values(data))^2), t)
-    tasks = Array{Task}(undef, t)
-    @sync for (i, subset) in collect(enumerate(subsets))
-        @async tasks[i] = @spawn near_neighbors_part(c, data[subset], p, r, offsets)
+    tasks = Array{Task}(undef, length(c.data))
+    # Iterate over non-empty cells
+    @sync for (i, (cell, is)) in enumerate(c.data)
+        @async tasks[i] = @spawn brute_cell(cell, is, p, r, c.data, offsets)
     end
     pts = fetch.(tasks)
-    return reduce(vcat, pts)
+    return isempty(pts) ? [] : reduce(vcat, pts)
 end

@@ -179,7 +179,7 @@ function cell_list_near_neighbors(seed::Int, measure::Measure)
     snn = benchmarks2(near_neighbors, ps, ns, rs, measure)
 
     @info "Benchmarking p_near_neighbors"
-    pnn = benchmarks2((c, p, r) -> p_near_neighbors(c, p, r; t=3*nthreads()), ps, ns, rs, measure)
+    pnn = benchmarks2(p_near_neighbors, ps, ns, rs, measure)
 
     plt = plot(title="$measure", size=(720, 480), legend=:topleft)
     plot_stats!(plt, n_cells, snn, "Serial")
