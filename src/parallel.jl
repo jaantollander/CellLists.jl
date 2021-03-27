@@ -52,8 +52,10 @@ end
 function p_near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T) where d where T <: AbstractFloat
     offsets = neighbors(d)
     pts = [Vector{Tuple{Int, Int}}() for _ in 1:nthreads()]
-    # Iterate over non-empty cells
-    @sync for (i, (cell, is)) in enumerate(c.data)
+    data = collect(c.data)
+    perm = sortperm(@. length(getfield(data, 2)))
+    # Iterate over non-empty cells in decreasing order of points per cell
+    @sync for (cell, is) in reverse(data[perm])
         @spawn brute_force_cell(pts, cell, is, p, r, c.data, offsets)
     end
     return reduce(vcat, pts)
