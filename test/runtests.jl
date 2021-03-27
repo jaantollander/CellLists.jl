@@ -65,12 +65,21 @@ function test_parallel_near_neighbors(rng::AbstractRNG, ns::Vector{Int}, ds::Vec
         @info "Testing parallel: n: $n | d: $d | r: $r"
         for i in 1:iterations
             p = 2 .* rand(rng, n, d) .- 1.0
-            a = brute_force(p, r)
             c = CellList(p, r)
+            a = near_neighbors(c, p, r)
             b = p_near_neighbors(c, p, r)
             @test Set(Set.(b)) == Set(Set.(a))
         end
     end
+end
+
+function test_parallel_near_neighbors_large(rng::AbstractRNG, n::Int, d::Int, r::Float64)
+    @info "Testing parallel: n: $n | d: $d | r: $r"
+    p = 2 .* rand(rng, n, d) .- 1.0
+    c = CellList(p, r)
+    a = near_neighbors(c, p, r)
+    b = p_near_neighbors(c, p, r)
+    @test Set(Set.(b)) == Set(Set.(a))
 end
 
 const rng = MersenneTwister(894)
@@ -81,3 +90,5 @@ test_sequential(rng, ns, ds, rs, 20)
 test_merge(rng, ns, ds, rs)
 test_parallel_constructor(rng, ns, ds, rs)
 test_parallel_near_neighbors(rng, ns, ds, rs, 20)
+test_parallel_near_neighbors_large(rng, 20000, 2, 0.01)
+test_parallel_near_neighbors_large(rng, 30000, 3, 0.01)
