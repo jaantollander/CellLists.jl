@@ -1,5 +1,9 @@
-using Random, Statistics, Plots, BenchmarkTools, ProgressMeter, Dates
 using Base.Threads
+using Dates
+using Random
+using Plots
+using BenchmarkTools
+using ProgressMeter
 using CellLists
 
 
@@ -32,27 +36,12 @@ function distribution(trials::Vector{BenchmarkTools.Trial}, measure::Measure)
     getfield.(median.(trials), Symbol(measure))
 end
 
-function benchmarks1(algorithm::Function, psn::Vector{Vector{Array{T, 2}}}, r::T, measure::Measure) where T <: AbstractFloat
+function benchmarks(algorithm::Function, psn::Vector{Vector{Array{T, 2}}}, r::T, measure::Measure; samples=500, seconds=0.5) where T <: AbstractFloat
     data = zeros(length(psn), length(psn[1]))
     @showprogress for (i, ps) in enumerate(psn)
         trials = BenchmarkTools.Trial[]
         for p in ps
-            t = run(@benchmarkable $algorithm($p, $r) samples=500 seconds=0.5)
-            push!(trials, t)
-        end
-        data[i, :] = distribution(trials, measure)
-    end
-    return data
-end
-
-function benchmarks2(algorithm::Function, ps::Vector{Array{T, 2}}, ns::Vector{Int}, rs::Vector{T}, measure::Measure) where T <: AbstractFloat
-    data = zeros(length(rs), length(ps))
-    @showprogress for (i, (n, r)) in collect(enumerate(zip(ns, rs)))
-        trials = BenchmarkTools.Trial[]
-        for p in ps
-            pn = p[1:n, :]
-            c = CellList(pn, r)
-            t = run(@benchmarkable $algorithm($c, $pn, $r) samples=500 seconds=0.5)
+            t = run(@benchmarkable $algorithm($p, $r) samples=samples seconds=seconds)
             push!(trials, t)
         end
         data[i, :] = distribution(trials, measure)
@@ -92,11 +81,11 @@ function cell_list_vs_brute_force(seed::Int, measure::Measure)
         psn1 = [[rand(rng, n, d) for _ in 1:10] for n in ns]
 
         @info "Benchmarking Cell List"
-        cl = benchmarks1(cell_list, psn1, r, measure)
+        cl = benchmarks(cell_list, psn1, r, measure)
 
         @info "Benchmarking Brute Force"
         psn2 = [psn[1:3] for psn in psn1]
-        bf = benchmarks1(brute_force, psn2, r, measure)
+        bf = benchmarks(brute_force, psn2, r, measure)
 
         plt = plot(title="$measure | r: $r, d: $d", size=(720, 480), legend=:topleft)
         plot_stats!(plt, ns, cl, "Cell List")
@@ -119,7 +108,7 @@ function cell_list_dimensionality(seed::Int, measure::Measure)
         psn = [[rand(rng, n, d) for _ in 1:1] for n in ns]
 
         @info "Benchmarking Cell List"
-        cl = benchmarks1(cell_list, psn, r, measure)
+        cl = benchmarks(cell_list, psn, r, measure)
 
         plot_stats!(plt, ns, cl, "Cell List d: $d")
     end
@@ -141,10 +130,10 @@ function cell_list_constructor(seed::Int, measure::Measure)
         psn = [[rand(rng, n, d) for _ in 1:iterations] for n in ns]
 
         @info "Benchmarking CellList construtor serial"
-        cl1 = benchmarks1((p, r) -> CellList(p, r), psn, r, measure)
+        cl1 = benchmarks((p, r) -> CellList(p, r), psn, r, measure)
 
         @info "Benchmarking CellList construtor parallel"
-        cl2 = benchmarks1((p, r) -> CellList(p, r, Val(:parallel)), psn, r, measure)
+        cl2 = benchmarks((p, r) -> CellList(p, r, Val(:parallel)), psn, r, measure)
 
         plt = plot(title="$measure | r: $r, d: $d", size=(720, 480), legend=:topleft)
         plot_stats!(plt, ns, cl1, "CellList serial")
@@ -161,38 +150,4 @@ function cell_list_constructor(seed::Int, measure::Measure)
         savefig(plt, joinpath(directory, "d$d-r$r-n$(ns[end]).svg"))
         savefig(plt2, joinpath(directory, "d$d-r$r-n$(ns[end])-ratio.svg"))
     end
-end
-
-function cell_list_near_neighbors(seed::Int, measure::Measure)
-    iterations = 100
-    # Constant average density, points per cell times number of cells.
-    avg_density = 10
-    n_cells = collect(1000:100:2000)
-    d = 2
-    ns = avg_density .* n_cells
-    rs = @. 1/(n_cells^(1/d))
-
-    rng = MersenneTwister(seed)
-    ps = [rand(rng, maximum(ns), d) for _ in 1:iterations]
-
-    @info "Benchmarking near_neighbors"
-    snn = benchmarks2(near_neighbors, ps, ns, rs, measure)
-
-    @info "Benchmarking p_near_neighbors"
-    pnn = benchmarks2(p_near_neighbors, ps, ns, rs, measure)
-
-    plt = plot(title="$measure", size=(720, 480), legend=:topleft)
-    plot_stats!(plt, n_cells, snn, "Serial")
-    plot_stats!(plt, n_cells, pnn, "Parallel ($(nthreads()) threads)")
-
-    ratio = snn./pnn
-    plt2 = plot(title="$measure ratio", size=(720, 480), legend=:topright,
-                xticks=n_cells,
-                yticks=round.(LinRange(min(1.0, minimum(ratio)), maximum(ratio), 15), digits=2))
-    plot_stats!(plt2, n_cells, ratio, "ratio: serial/parallel ($(nthreads()) threads)")
-    plot!(plt2, [minimum(n_cells), maximum(n_cells)], [1, 1], linestyle=:dash, alpha=0.5, linewidth=2, label="ratio: 1")
-
-    directory = figure_directory("cell_list_near_neighbors")
-    savefig(plt, joinpath(directory, "density-$(avg_density).svg"))
-    savefig(plt2, joinpath(directory, "density-$(avg_density)-ratio.svg"))
 end
