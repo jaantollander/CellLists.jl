@@ -1,4 +1,5 @@
-using Test, Logging, Random
+using Test
+using Random
 using CellLists
 
 function brute_force(p::Array{T, 2}, r::T) where T <: AbstractFloat
