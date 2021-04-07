@@ -68,7 +68,7 @@ function test_parallel_near_neighbors(rng::AbstractRNG, ns::Vector{Int}, ds::Vec
             p = 2 .* rand(rng, n, d) .- 1.0
             c = CellList(p, r)
             a = near_neighbors(c, p, r)
-            b = p_near_neighbors(c, p, r)
+            b = near_neighbors(c, p, r, Val(:parallel))
             @test Set(Set.(b)) == Set(Set.(a))
         end
     end
@@ -79,7 +79,7 @@ function test_parallel_near_neighbors_large(rng::AbstractRNG, n::Int, d::Int, r:
     p = 2 .* rand(rng, n, d) .- 1.0
     c = CellList(p, r)
     a = near_neighbors(c, p, r)
-    b = p_near_neighbors(c, p, r)
+    b = near_neighbors(c, p, r, Val(:parallel))
     @test Set(Set.(b)) == Set(Set.(a))
 end
 

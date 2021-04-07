@@ -49,7 +49,7 @@ function brute_force_cell!(pts, cell, is, p, r, data, offsets)
 end
 
 """Parallel near neighbors"""
-function p_near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T) where d where T <: AbstractFloat
+function near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T, ::Val{:parallel}) where d where T <: AbstractFloat
     offsets = neighbors(d)
     pts = [Vector{Tuple{Int, Int}}() for _ in 1:nthreads()]
     data = collect(c.data)
