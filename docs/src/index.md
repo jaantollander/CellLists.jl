@@ -1,6 +1,4 @@
 # CellLists.jl
-![](images/cell_list.svg)
-
 Documentation for CellLists.jl
 
 ## Serial

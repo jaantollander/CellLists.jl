@@ -4,7 +4,7 @@
 
 
 ## Description
-**Cell Lists** is an algorithm that solves the fixed-radius near neighbors problem. That is, it finds all pairs of points that are within a fixed distance apart from each other. We can use the Cell Lists algorithm as a part of molecular or agent-based simulations where the interaction potential has a finite range.
+**Cell Lists** is an algorithm that solves the fixed-radius near neighbors problem. That is, it finds all pairs of points that are within a fixed distance apart from each other. We can use the Cell Lists algorithm as a part of molecular dynamics or agent-based simulations where the interaction potential has a finite range.
 
 You can read more about it in the article [**Searching for Fixed-Radius Near Neighbors with Cell Lists Algorithm in Julia Language**](https://jaantollander.com/post/searching-for-fixed-radius-near-neighbors-with-cell-lists-algorithm-in-julia-language/), which explores the Cell Lists algorithm and theory behind it more deeply. We also extended the algorithm to a multithreaded version, which we explain in the article [**Multithreading in Julia Language in Julia Language Applied to Cell Lists Algorithm**](https://jaantollander.com/post/multithreading-in-julia-language-applied-to-cell-lists-algorithm/).
 
