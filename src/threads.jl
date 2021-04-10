@@ -14,13 +14,13 @@ function Base.merge(c1::CellList{d}, c2::CellList{d}) where d
     CellList{d}(merge(vcat, c1.data, c2.data))
 end
 
-"""Multi-threaded constructor for CellList.
+"""Multithreaded CellList constructor.
 
 # Examples
 ```julia
 n, d, r = 100, 2, 0.01
 p = rand(n, d)
-c = CellList(p, r, Val(:parallel))
+c = CellList(p, r, Val(:threads))
 ```
 """
 function CellList(p::Array{T, 2}, r::T, ::Val{:threads}) where T <: AbstractFloat
@@ -48,7 +48,13 @@ function brute_force_cell!(pts, cell, is, p, r, data, offsets)
     end
 end
 
-"""Parallel near neighbors"""
+"""Multithreaded near neighbors.
+
+# Examples
+```julia-repl
+julia> near_neighbors(c, p, r, Val(:threads))
+[(1, 4), (3, 11), ...]
+"""
 function near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T, ::Val{:threads}) where d where T <: AbstractFloat
     offsets = neighbors(d)
     pts = [Vector{Tuple{Int, Int}}() for _ in 1:nthreads()]
