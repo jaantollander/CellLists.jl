@@ -63,11 +63,11 @@ On average, the Cell List algorithm is more efficient than brute force when dime
 We can use the multithreaded version of Cell Lists by dispatching with the `Val(:parallel)` value type.
 
 ```julia
-c = CellLists(p, r, Val(:parallel))
+c = CellLists(p, r, Val(:threads))
 ```
 
 ```julia
-near_neighbors(c, p, r, Val(:parallel))
+near_neighbors(c, p, r, Val(:threads))
 ```
 
 

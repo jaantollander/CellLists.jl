@@ -53,7 +53,7 @@ function test_parallel_constructor(rng::AbstractRNG, ns, ds, rs)
         @info "Testing parallel constructor: n: $n | d: $d | r: $r"
         p = 2 .* rand(rng, n, d) .- 1.0
         c1 = CellList(p, r)
-        c2 = CellList(p, r, Val(:parallel))
+        c2 = CellList(p, r, Val(:threads))
         @test Set(keys(c1.data)) == Set(keys(c2.data))
         for cell in keys(c1.data)
             @test Set(c1.data[cell]) == Set(c2.data[cell])
@@ -68,7 +68,7 @@ function test_parallel_near_neighbors(rng::AbstractRNG, ns::Vector{Int}, ds::Vec
             p = 2 .* rand(rng, n, d) .- 1.0
             c = CellList(p, r)
             a = near_neighbors(c, p, r)
-            b = near_neighbors(c, p, r, Val(:parallel))
+            b = near_neighbors(c, p, r, Val(:threads))
             @test Set(Set.(b)) == Set(Set.(a))
         end
     end
@@ -79,7 +79,7 @@ function test_parallel_near_neighbors_large(rng::AbstractRNG, n::Int, d::Int, r:
     p = 2 .* rand(rng, n, d) .- 1.0
     c = CellList(p, r)
     a = near_neighbors(c, p, r)
-    b = near_neighbors(c, p, r, Val(:parallel))
+    b = near_neighbors(c, p, r, Val(:threads))
     @test Set(Set.(b)) == Set(Set.(a))
 end
 

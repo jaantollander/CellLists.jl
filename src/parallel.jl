@@ -23,7 +23,7 @@ p = rand(n, d)
 c = CellList(p, r, Val(:parallel))
 ```
 """
-function CellList(p::Array{T, 2}, r::T, ::Val{:parallel}) where T <: AbstractFloat
+function CellList(p::Array{T, 2}, r::T, ::Val{:threads}) where T <: AbstractFloat
     t = nthreads()
     n, d = size(p)
     cs = cumsum(fill(fld(n, t), t-1))
@@ -49,7 +49,7 @@ function brute_force_cell!(pts, cell, is, p, r, data, offsets)
 end
 
 """Parallel near neighbors"""
-function near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T, ::Val{:parallel}) where d where T <: AbstractFloat
+function near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T, ::Val{:threads}) where d where T <: AbstractFloat
     offsets = neighbors(d)
     pts = [Vector{Tuple{Int, Int}}() for _ in 1:nthreads()]
     data = collect(c.data)
