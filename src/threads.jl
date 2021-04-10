@@ -54,6 +54,7 @@ end
 ```julia-repl
 julia> near_neighbors(c, p, r, Val(:threads))
 [(1, 4), (3, 11), ...]
+```
 """
 function near_neighbors(c::CellList{d}, p::Array{T, 2}, r::T, ::Val{:threads}) where d where T <: AbstractFloat
     offsets = neighbors(d)
