@@ -4,7 +4,7 @@ Documentation for CellLists.jl
 ## Serial
 ```@docs
 CellList
-CellList(::Array{T, 2}, ::T) where T <: AbstractFloat
+CellList(::Array{T, 2}, ::T; ::Int) where T <: AbstractFloat
 near_neighbors(::CellList, ::Array{T, 2}, ::T) where T <: AbstractFloat
 ```
 

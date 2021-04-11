@@ -30,7 +30,7 @@ function CellList(p::Array{T, 2}, r::T, ::Val{:threads}) where T <: AbstractFloa
     parts = zip([0; cs], [cs; n])
     res = Array{CellList{d}, 1}(undef, t)
     @threads for (i, (a, b)) in collect(enumerate(parts))
-        res[i] = CellList(p[(a+1):b, :], r, a)
+        res[i] = CellList(p[(a+1):b, :], r; offset=a)
     end
     return reduce(merge, res)
 end

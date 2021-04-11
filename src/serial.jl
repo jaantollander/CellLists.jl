@@ -13,7 +13,7 @@ p = rand(n, d)
 c = CellLists(p, r)
 ```
 """
-function CellList(p::Array{T, 2}, r::T, offset::Int=0) where T <: AbstractFloat
+function CellList(p::Array{T, 2}, r::T; offset::Int=0) where T <: AbstractFloat
     @assert r > 0
     n, d = size(p)
     cells = @. Int(fld(p, r))
