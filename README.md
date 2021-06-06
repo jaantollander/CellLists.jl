@@ -10,7 +10,13 @@ You can read more about it in the article [**Searching for Fixed-Radius Near Nei
 
 
 ## Installation
-You can install Cell Lists with the Julia package manager.
+At the moment, you can install Cell Lists from GitHub.
+
+```
+pkg> add https://github.com/jaantollander/CellLists.jl
+```
+
+I'm working on releasing the package to the Julia package register. Then, you can install Cell Lists with the Julia package manager.
 
 ```
 pkg> add CellLists
