@@ -9,6 +9,8 @@
 
 You can read more about it in the article [**Searching for Fixed-Radius Near Neighbors with Cell Lists Algorithm in Julia Language**](https://jaantollander.com/post/searching-for-fixed-radius-near-neighbors-with-cell-lists-algorithm-in-julia-language/), which explores the Cell Lists algorithm and theory behind it more deeply. We also extended the algorithm to a multithreaded version, which we explain in the article [**Multithreading in Julia Language in Julia Language Applied to Cell Lists Algorithm**](https://jaantollander.com/post/multithreading-in-julia-language-applied-to-cell-lists-algorithm/).
 
+
+## Citation
 You can cite the `CellLists.jl` repository and code by navigating to the [**DOI**](https://zenodo.org/badge/latestdoi/298188925) provided by Zenodo and then choosing your preferred citation format from the *Export* section.
 
 
