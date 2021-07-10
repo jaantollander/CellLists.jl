@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [0.1.0] - 2021-07-06
+Implemented serial and multi-threaded versions of the Cell Lists algorithm.
 
 
 [Unreleased]: https://github.com/jaantollander/CellLists.jl/compare/v0.1.0...HEAD
