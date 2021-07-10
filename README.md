@@ -1,6 +1,7 @@
 # CellLists.jl
-[![Docs Image](https://img.shields.io/badge/docs-latest-blue.svg)](https://jaantollander.github.io/CellLists.jl/dev/)
-![Runtests](https://github.com/jaantollander/CellLists.jl/workflows/Runtests/badge.svg)
+[![DOI](https://zenodo.org/badge/298188925.svg)](https://zenodo.org/badge/latestdoi/298188925)
+[![Docs Image](https://img.shields.io/badge/docs-stable-blue.svg)](https://jaantollander.github.io/CellLists.jl/stable/)
+[![Runtests](https://github.com/jaantollander/CellLists.jl/workflows/Runtests/badge.svg)](https://github.com/jaantollander/CellLists.jl/actions/workflows/Runtests.yml)
 
 
 ## Description
@@ -8,18 +9,20 @@
 
 You can read more about it in the article [**Searching for Fixed-Radius Near Neighbors with Cell Lists Algorithm in Julia Language**](https://jaantollander.com/post/searching-for-fixed-radius-near-neighbors-with-cell-lists-algorithm-in-julia-language/), which explores the Cell Lists algorithm and theory behind it more deeply. We also extended the algorithm to a multithreaded version, which we explain in the article [**Multithreading in Julia Language in Julia Language Applied to Cell Lists Algorithm**](https://jaantollander.com/post/multithreading-in-julia-language-applied-to-cell-lists-algorithm/).
 
+You can cite the `CellLists.jl` repository and code by navigating to the [**DOI**](https://zenodo.org/badge/latestdoi/298188925) provided by Zenodo and then choosing your preferred citation format from the *Export* section.
+
 
 ## Installation
-At the moment, you can install Cell Lists from GitHub.
-
-```
-pkg> add https://github.com/jaantollander/CellLists.jl
-```
-
-I'm working on releasing the package to the Julia package register. Then, you can install Cell Lists with the Julia package manager.
+You can install `CellLists.jl` with the Julia package manager.
 
 ```
 pkg> add CellLists
+```
+
+Alternatively, you can install `CellLists.jl` directly from the GitHub repository.
+
+```
+pkg> add https://github.com/jaantollander/CellLists.jl
 ```
 
 
