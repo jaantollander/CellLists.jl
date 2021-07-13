@@ -11,7 +11,20 @@ You can read more about it in the article [**Searching for Fixed-Radius Near Nei
 
 
 ## Citation
-You can cite the `CellLists.jl` repository and code by navigating to the [**DOI**](https://zenodo.org/badge/latestdoi/298188925) provided by Zenodo and then choosing your preferred citation format from the *Export* section.
+You can cite the `CellLists.jl` repository and code by navigating to the [**DOI**](https://zenodo.org/badge/latestdoi/298188925) provided by Zenodo and then choosing your preferred citation format from the *Export* section. For example, we can export [BibTex](https://zenodo.org/record/5075063/export/hx) format, which looks as follows.
+
+```bibtex
+@software{jaan_tollander_de_balsch_2021_5075063,
+  author       = {Jaan Tollander de Balsch},
+  title        = {jaantollander/CellLists.jl: v0.1.0},
+  month        = jul,
+  year         = 2021,
+  publisher    = {Zenodo},
+  version      = {v0.1.0},
+  doi          = {10.5281/zenodo.5075063},
+  url          = {https://doi.org/10.5281/zenodo.5075063}
+}
+```
 
 
 ## Installation
