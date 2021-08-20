@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Tollander de Balsch"
+  given-names: "Jaan"
+  orcid: ""
+title: "jaantollander/CellLists.jl"
+version: 0.1.0
+doi: 10.5281/zenodo.5075063
+date-released: 2021-07-01
+url: "https://doi.org/10.5281/zenodo.5075063"
